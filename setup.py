@@ -3,7 +3,8 @@ from distutils.core import setup
 setup(
     name='stattlepy',
     version='0.1dev',
-    packages=['stattlepy',],
+    author = 'Adam Jenkins',
+    packages=['stattlepy'],
     license='MIT',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
 )
