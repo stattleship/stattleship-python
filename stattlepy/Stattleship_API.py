@@ -1,6 +1,9 @@
 import requests
 import json
+import math
+import time
 
+### Main class that all Stattleship functions will be a part of
 class Stattleship(object):
         
         # function to set the token
@@ -21,8 +24,10 @@ class Stattleship(object):
                 query = list()
                 version = 1
                 walk = False
-                page = None
+                page = 1
                 verbose = True
+                place = None
+                stat_type = None
                 param = {}
                 
                 # loop through inputs and 
@@ -42,22 +47,45 @@ class Stattleship(object):
                         elif str(key) == 'verbose':
                                 verbose = value
                         elif str(key) == 'stat_type':
-                                param['type'] = value  
+                             param['type'] = value
                         else:
                                 param[key] = value
                 
-                
-                if(verbose):
-                    print 'Making Initial API Request'
+                ### initial verbose to indicate request occurring
+                if verbose:
+                    print'Making Initial API Request'
                     
-                ###NOTE WALK IS NOT YET SUPPORTED, IN DEV
-                        
-                tmp = self.query_api(sport, league, ep, param, version, walk, page, verbose, token )
+                ### initial query       
+                tmp, return_header = self.query_api(sport, league, ep, param, version, walk, page, verbose, token)
                
+                ### make response list
                 response = list()
                
-                response.append(tmp)       
-               
+                ### set the original first parsed 
+                response.append(tmp)
+                
+                ### walk function IN PROGRESS
+                if(walk):
+                        
+                    ### append the results from pages 2+ to the response list
+                    while 'link' in return_header:
+                        for p in range(2,pages+1):
+                            
+                            ### set page number to pass to API call
+                            page = p 
+                            
+                            ###if verbose print out which page it is returning
+                            if verbose:
+                                print 'Retrieving results from page',p,'from',pages
+                                
+                            tmp_p, return_header_p = self.query_api(sport, league, ep, param, version, walk, page, verbose, token)
+                            
+                            response.append(tmp_p)
+                            
+                            ### delay in making call
+                            time.sleep(0.5)
+                        
+                print 'Stattleship API request complete'                
                 return(response)
             
         def query_api(self, sport, league, ep, param, version, walk, page, verbose, token):
@@ -67,9 +95,9 @@ class Stattleship(object):
                 league = league.lower()
                 ep = ep.lower()        
                 
-                url = 'https://www.stattleship.com/%s/%s/%s' % (sport, league, ep)
+                url = 'https://www.stattleship.com/{}/{}/{}'.format(sport, league, ep)
                 
-                if page >= 1 and isinstance(page, Number):
+                if page >= 1:
                         param['page'] = page
                 
                 headers = {
@@ -79,13 +107,13 @@ class Stattleship(object):
                 }
                 
                 res = requests.get(url,params=param, headers = headers)
+    
                 
-                print res
-                print res.url
-                
+                if verbose:
+                    print res
+                    print res.url
+                    print res.headers
+    
                 content = json.loads(res.content)
                 
-                return(content)
-        
-        
-
+                return(content, res.headers)
