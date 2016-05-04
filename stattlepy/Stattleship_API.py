@@ -41,6 +41,8 @@ class Stattleship(object):
                                 page = value 
                         elif str(key) == 'verbose':
                                 verbose = value
+                        elif str(key) == 'stat_type':
+                                param['type'] = value  
                         else:
                                 param[key] = value
                 
@@ -48,7 +50,7 @@ class Stattleship(object):
                 if(verbose):
                     print 'Making Initial API Request'
                     
-                ###NOTE WALK IS NOT YET SUPPORTED
+                ###NOTE WALK IS NOT YET SUPPORTED, IN DEV
                         
                 tmp = self.query_api(sport, league, ep, param, version, walk, page, verbose, token )
                
