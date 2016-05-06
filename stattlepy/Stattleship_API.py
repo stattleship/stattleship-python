@@ -1,7 +1,20 @@
+#!/usr/bin/env python
+
+#Install: 
+#git clone https://github.com/stattleship/stattleship-python.git
+#cd /PATH/TO/DIRECTORY/
+#sudo python setup.py install
+
+#Usage:
+#New_query = Stattleship()
+#Token = New_query.set_token('YOUR_TOKEN')
+#Output = New_query.ss_get_results(sport='basketball',league='nba',ep='game_logs',player_id='nba-stephen-curry')
+
 import requests
 import json
 import math
 import time
+import re
 
 ### Main class that all Stattleship functions will be a part of
 class Stattleship(object):
@@ -64,26 +77,38 @@ class Stattleship(object):
                 ### set the original first parsed 
                 response.append(tmp)
                 
-                ### walk function IN PROGRESS
+                ### walk function using REGEX to idenify the next link in the header to pull next request 
                 if(walk):
-                        
-                    ### append the results from pages 2+ to the response list
                     while 'link' in return_header:
-                        for p in range(2,pages+1):
-                            
-                            ### set page number to pass to API call
-                            page = p 
-                            
-                            ###if verbose print out which page it is returning
+                        
+                        ### Next link to request from the API
+                        next_link = re.findall( 'rel="last", <(.*?)>; rel="next"', return_header['link'], re.MULTILINE)
+                        
+                        ### Use try and except to see if the next link was found within the header
+                        try:
                             if verbose:
-                                print 'Retrieving results from page',p,'from',pages
-                                
-                            tmp_p, return_header_p = self.query_api(sport, league, ep, param, version, walk, page, verbose, token)
-                            
-                            response.append(tmp_p)
-                            
+                                print 'Next link sent to API:'
+                                print next_link[0]
+
+                            headers = {
+                            'Authorization': token,
+                            'Accept':'application/vnd.stattleship.com; version=%s' %version,
+                            'Content-Type':'application/json'        
+                            }
+
+                            res = requests.get(next_link[0], headers = headers)
+
+                            content = json.loads(res.content)
+
+                            response.append(content)
+
+                            return_header = res.headers
+
                             ### delay in making call
-                            time.sleep(0.5)
+                            time.sleep(0.1)
+                            
+                        except IndexError:
+                            break
                         
                 print 'Stattleship API request complete'                
                 return(response)
@@ -95,8 +120,10 @@ class Stattleship(object):
                 league = league.lower()
                 ep = ep.lower()        
                 
+                ### base url to make the request from
                 url = 'https://www.stattleship.com/{}/{}/{}'.format(sport, league, ep)
                 
+                ### depends on page being requested
                 if page >= 1:
                         param['page'] = page
                 
@@ -104,16 +131,14 @@ class Stattleship(object):
                         'Authorization': token,
                         'Accept':'application/vnd.stattleship.com; version=%s' %version,
                         'Content-Type':'application/json'        
-                }
+                         }
                 
                 res = requests.get(url,params=param, headers = headers)
-    
                 
                 if verbose:
                     print res
                     print res.url
-                    print res.headers
-    
-                content = json.loads(res.content)
                 
+                content = json.loads(res.content)
+               
                 return(content, res.headers)
