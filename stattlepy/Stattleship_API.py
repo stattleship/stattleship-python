@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+### Version 0.0.1
+
 #Install: 
 #git clone https://github.com/stattleship/stattleship-python.git
 #cd /PATH/TO/DIRECTORY/
@@ -15,9 +17,13 @@ import json
 import math
 import time
 import re
+import platform
+import stattlepy
 
 ### Main class that all Stattleship functions will be a part of
 class Stattleship(object):
+    
+        
         
         # function to set the token
         def set_token(self, pro_token):        
@@ -93,8 +99,11 @@ class Stattleship(object):
                             headers = {
                             'Authorization': token,
                             'Accept':'application/vnd.stattleship.com; version=%s' %version,
-                            'Content-Type':'application/json'        
+                            'Content-Type':'application/json',
+                            'User-Agent':'Stattleship Python/{} ({})'.format(stattlepy.__version__,platform.platform())
                             }
+                            
+                            print headers
 
                             res = requests.get(next_link[0], headers = headers)
 
@@ -130,7 +139,8 @@ class Stattleship(object):
                 headers = {
                         'Authorization': token,
                         'Accept':'application/vnd.stattleship.com; version=%s' %version,
-                        'Content-Type':'application/json'        
+                        'Content-Type':'application/json',
+                        'User-Agent':'Stattleship Python/{} ({})'.format(stattlepy.__version__,platform.platform())
                          }
                 
                 res = requests.get(url,params=param, headers = headers)
