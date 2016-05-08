@@ -26,6 +26,7 @@ sudo python setup.py install
 Obtain an access TOKEN from [stattleship.com](www.stattleship.com). Load Python and initialize your TOKEN for your session and load the library:
 
 ```
+from stattlepy import Stattleship
 New_query = Stattleship()
 Token = New_query.set_token('YOUR_TOKEN')
 Output = New_query.ss_get_results(sport='basketball',league='nba',ep='game_logs',player_id='nba-stephen-curry')

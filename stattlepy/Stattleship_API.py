@@ -1,7 +1,29 @@
+#!/usr/bin/env python
+
+### Version 0.0.1
+
+#Install: 
+#git clone https://github.com/stattleship/stattleship-python.git
+#cd /PATH/TO/DIRECTORY/
+#sudo python setup.py install
+
+#Usage:
+#New_query = Stattleship()
+#Token = New_query.set_token('YOUR_TOKEN')
+#Output = New_query.ss_get_results(sport='basketball',league='nba',ep='game_logs',player_id='nba-stephen-curry')
+
 import requests
 import json
+import math
+import time
+import re
+import platform
+import stattlepy
 
+### Main class that all Stattleship functions will be a part of
 class Stattleship(object):
+    
+        
         
         # function to set the token
         def set_token(self, pro_token):        
@@ -21,8 +43,10 @@ class Stattleship(object):
                 query = list()
                 version = 1
                 walk = False
-                page = None
+                page = 1
                 verbose = True
+                place = None
+                stat_type = None
                 param = {}
                 
                 # loop through inputs and 
@@ -42,22 +66,60 @@ class Stattleship(object):
                         elif str(key) == 'verbose':
                                 verbose = value
                         elif str(key) == 'stat_type':
-                                param['type'] = value  
+                             param['type'] = value
                         else:
                                 param[key] = value
                 
-                
-                if(verbose):
-                    print 'Making Initial API Request'
+                ### initial verbose to indicate request occurring
+                if verbose:
+                    print'Making Initial API Request'
                     
-                ###NOTE WALK IS NOT YET SUPPORTED, IN DEV
-                        
-                tmp = self.query_api(sport, league, ep, param, version, walk, page, verbose, token )
+                ### initial query       
+                tmp, return_header = self.query_api(sport, league, ep, param, version, walk, page, verbose, token)
                
+                ### make response list
                 response = list()
                
-                response.append(tmp)       
-               
+                ### set the original first parsed 
+                response.append(tmp)
+                
+                ### walk function using REGEX to idenify the next link in the header to pull next request 
+                if(walk):
+                    while 'link' in return_header:
+                        
+                        ### Next link to request from the API
+                        next_link = re.findall( 'rel="last", <(.*?)>; rel="next"', return_header['link'], re.MULTILINE)
+                        
+                        ### Use try and except to see if the next link was found within the header
+                        try:
+                            if verbose:
+                                print 'Next link sent to API:'
+                                print next_link[0]
+
+                            headers = {
+                            'Authorization': token,
+                            'Accept':'application/vnd.stattleship.com; version=%s' %version,
+                            'Content-Type':'application/json',
+                            'User-Agent':'Stattleship Python/{} ({})'.format(stattlepy.__version__,platform.platform())
+                            }
+                            
+                            print headers
+
+                            res = requests.get(next_link[0], headers = headers)
+
+                            content = json.loads(res.content)
+
+                            response.append(content)
+
+                            return_header = res.headers
+
+                            ### delay in making call
+                            time.sleep(0.1)
+                            
+                        except IndexError:
+                            break
+                        
+                print 'Stattleship API request complete'                
                 return(response)
             
         def query_api(self, sport, league, ep, param, version, walk, page, verbose, token):
@@ -67,25 +129,26 @@ class Stattleship(object):
                 league = league.lower()
                 ep = ep.lower()        
                 
-                url = 'https://www.stattleship.com/%s/%s/%s' % (sport, league, ep)
+                ### base url to make the request from
+                url = 'https://www.stattleship.com/{}/{}/{}'.format(sport, league, ep)
                 
-                if page >= 1 and isinstance(page, Number):
+                ### depends on page being requested
+                if page >= 1:
                         param['page'] = page
                 
                 headers = {
                         'Authorization': token,
                         'Accept':'application/vnd.stattleship.com; version=%s' %version,
-                        'Content-Type':'application/json'        
-                }
+                        'Content-Type':'application/json',
+                        'User-Agent':'Stattleship Python/{} ({})'.format(stattlepy.__version__,platform.platform())
+                         }
                 
                 res = requests.get(url,params=param, headers = headers)
                 
-                print res
-                print res.url
+                if verbose:
+                    print res
+                    print res.url
                 
                 content = json.loads(res.content)
-                
-                return(content)
-        
-        
-
+               
+                return(content, res.headers)
