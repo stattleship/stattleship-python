@@ -15,6 +15,12 @@ We're gonna need a bigger :boat:!
 Due to '''type''' function in python, to indicate the type of stat you would like to query, use the '''stat_type''' variable in the API call 
 
 ## Install
+With pip:
+```
+pip install git+https://github.com/stattleship/stattleship-python
+```
+
+Without pip:
 ```
 git clone https://github.com/stattleship/stattleship-python.git
 cd /PATH/TO/DIRECTORY/
