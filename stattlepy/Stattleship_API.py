@@ -130,7 +130,7 @@ class Stattleship(object):
                 ep = ep.lower()        
                 
                 ### base url to make the request from
-                url = 'https://www.stattleship.com/{}/{}/{}'.format(sport, league, ep)
+                url = 'https://api.stattleship.com/{}/{}/{}'.format(sport, league, ep)
                 
                 ### depends on page being requested
                 if page >= 1:
