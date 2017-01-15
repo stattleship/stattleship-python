@@ -23,14 +23,15 @@ def get_level4_data(level3, l4value):
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--p', '-player_id', type=str, dest='p_id', help='Player ID', metavar='pid')
-parser.add_argument('--l2', '-level2_key', type=str, dest='l2key', help='Player ID', metavar='l2')
-parser.add_argument('--l4', '-level4_key', type=str, dest='l4key', help='Player ID', metavar='l4')
+parser.add_argument('--l2', '-level2_key', type=str, dest='l2key', help='Level 2 term - refer to excel sheet for terms', metavar='l2')
+parser.add_argument('--l4', '-level4_key', type=str, dest='l4key', help='Level 4 term - refer to excel sheet for terms', metavar='l4')
+parser.add_argument('--t', '-token', type=str, dest='token', help='Enter your token from Stattleship', metavar='token')
 
 args = parser.parse_args()
 
 New_query = Stattleship()
 
-Token = New_query.set_token("dacf8c48e6a2261ee169e2d09a379840")
+Token = New_query.set_token(args.token)
 
 Output = New_query.ss_get_results(sport = "basketball", league="nba", ep="game_logs", player_id = args.p_id)
 
