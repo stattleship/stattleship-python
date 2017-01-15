@@ -1,3 +1,7 @@
+""" this is a command line tool to get specific stats by player
+check associated excel file query_by_player_terms.xlsx to get possible --l2 and --l4 terms to use
+output written to outfile.txt in same directory"""
+
 import argparse
 from stattlepy import Stattleship
 
