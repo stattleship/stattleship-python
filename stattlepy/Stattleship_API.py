@@ -21,7 +21,7 @@ class Stattleship(object):
                 query = list()
                 version = 1
                 walk = False
-                page = None
+                page = 1
                 verbose = True
                 param = {}
                 
@@ -65,13 +65,13 @@ class Stattleship(object):
                 league = league.lower()
                 ep = ep.lower()        
                 
-                url = 'https://www.stattleship.com/%s/%s/%s' % (sport, league, ep)
+                url = 'https://api.stattleship.com/%s/%s/%s' % (sport, league, ep)
                 
-                if page >= 1 and isinstance(page, Number):
+                if page >= 1 and isinstance(page, int):
                         param['page'] = page
                 
                 headers = {
-                        'Authorization': token,
+                        'Authorization': 'Token token=%s' %token,
                         'Accept':'application/vnd.stattleship.com; version=%s' %version,
                         'Content-Type':'application/json'        
                 }
@@ -81,7 +81,7 @@ class Stattleship(object):
                 print(res)
                 print(res.url)
                 
-                content = json.loads(res.content)
+                content = res.json()
                 
                 return(content)
         
